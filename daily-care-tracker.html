@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Care Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            background: transparent;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .content {
+            padding: 30px;
+            min-height: 400px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .activity-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .activity-type {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .type-bottle { background: #d4edda; color: #155724; }
+        .type-meal { background: #fff3cd; color: #856404; }
+        .type-nap-start { background: #cce5ff; color: #004085; }
+        .type-nap-end { background: #d1ecf1; color: #0c5460; }
+        .type-diaper { background: #e7e7ff; color: #4a4a9f; }
+        .type-potty { background: #f8d7da; color: #721c24; }
+        .type-breakfast { background: #fff3cd; color: #856404; }
+        .type-lunch { background: #d4edda; color: #155724; }
+        .type-snack { background: #ffe5cc; color: #8b4000; }
+        .type-mood-am { background: #e7e7ff; color: #4a4a9f; }
+        .type-mood-nap { background: #cce5ff; color: #004085; }
+        .type-mood-pm { background: #d1ecf1; color: #0c5460; }
+        
+        .activity-time {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .activity-child {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .activity-description {
+            color: #495057;
+            line-height: 1.5;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .date-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #495057;
+            padding: 15px 0 10px 0;
+            margin-top: 20px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .date-header:first-child {
+            margin-top: 0;
+        }
+        
+        .live-badge {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .quick-log {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .manage-children {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .child-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .child-tag {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .remove-child {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .add-child-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .add-child-form input,
+        .add-child-form select {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-grid-full {
+            grid-column: 1 / -1;
+        }
+        
+        .mood-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .mood-btn {
+            flex: 1;
+            padding: 15px;
+            border: 3px solid #dee2e6;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1.5em;
+            transition: all 0.2s;
+        }
+        
+        .mood-btn.selected {
+            border-width: 4px;
+            transform: scale(1.05);
+        }
+        
+        .mood-btn.green { border-color: #28a745; }
+        .mood-btn.green.selected { background: #d4edda; }
+        .mood-btn.yellow { border-color: #ffc107; }
+        .mood-btn.yellow.selected { background: #fff3cd; }
+        .mood-btn.red { border-color: #dc3545; }
+        .mood-btn.red.selected { background: #f8d7da; }
+        
+        .amount-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .amount-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .amount-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .tab {
+                font-size: 0.9em;
+                padding: 15px 10px;
+            }
+        }
+        
+        .custom-alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 10000;
+            text-align: center;
+            min-width: 300px;
+            animation: popIn 0.3s ease-out;
+        }
+        
+        .custom-alert h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .custom-alert p {
+            font-size: 1.1em;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .custom-alert button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes popIn {
+            from {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        .day-tab-btn {
+            padding: 12px 20px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .day-tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .day-tab-btn:hover {
+            border-color: #667eea;
+        }
+        
+        .parent-activity-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .parent-activity-icon {
+            font-size: 2em;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .parent-activity-content {
+            flex: 1;
+        }
+        
+        .parent-activity-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 3px;
+        }
+        
+        .parent-activity-details {
+            font-size: 0.95em;
+            color: #6c757d;
+        }
+        
+        .parent-activity-time {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #667eea;
+            min-width: 80px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Daily Care Tracker</h1>
+            <p>Tracks daily activity</p>
+        </div>
+        
+        <div class="tabs" style="display: none;">
+            <button class="tab active" onclick="showTab('teacher')">👩‍🏫 Quick Log</button>
+            <button class="tab" onclick="showTab('all')">📋 All Activities</button>
+            <button class="tab" onclick="showTab('manage')">⚙️ Manage</button>
+        </div>
+        
+        <div class="content">
+            <!-- Teacher Tab -->
+            <div id="teacher-tab" class="hidden" style="display: none;">
+                <div class="quick-log">
+                    <h2 style="margin-bottom: 20px; color: #495057;">Quick Log</h2>
+                    
+                    <div class="form-group">
+                        <label>My Classroom</label>
+                        <select id="teacherRoom" required onchange="saveDefaultRoom()">
+                            <option value="">Select your classroom...</option>
+                            <option value="Classroom 1">Classroom 1</option>
+                            <option value="Classroom 2">Classroom 2</option>
+                            <option value="Classroom 3">Classroom 3</option>
+                            <option value="Classroom 4">Classroom 4</option>
+                            <option value="Classroom 6">Classroom 6</option>
+                            <option value="Classroom 7">Classroom 7</option>
+                            <option value="Classroom 8">Classroom 8</option>
+                            <option value="Classroom 9">Classroom 9</option>
+                        </select>
+                        <p style="color: #6c757d; font-size: 0.9em; margin-top: 5px;">This will be remembered for next time</p>
+                    </div>
+                    
+                    <div id="activity-forms">
+                        <p style="color: #6c757d; text-align: center; padding: 40px;">Please select your classroom first</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manage Tab -->
+            <div id="manage-tab" class="hidden">
+                <div class="manage-children">
+                    <h2 style="margin-bottom: 15px; color: #495057;">Manage Children</h2>
+                    <p style="color: #6c757d; margin-bottom: 15px;">Add children and get their parent link</p>
+                    
+                    <div class="child-list" id="child-list">
+                        <div class="loading">Loading...</div>
+                    </div>
+                    
+                    <div class="add-child-form">
+                        <select id="newChildRoom">
+                            <option value="">Select classroom...</option>
+                            <option value="Classroom 1">Classroom 1</option>
+                            <option value="Classroom 2">Classroom 2</option>
+                            <option value="Classroom 3">Classroom 3</option>
+                            <option value="Classroom 4">Classroom 4</option>
+                            <option value="Classroom 6">Classroom 6</option>
+                            <option value="Classroom 7">Classroom 7</option>
+                            <option value="Classroom 8">Classroom 8</option>
+                            <option value="Classroom 9">Classroom 9</option>
+                        </select>
+                        <input type="text" id="newChildName" placeholder="Child's name">
+                        <button class="add-btn" onclick="addChild()">+ Add Child</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- All Activities Tab -->
+            <div id="all-tab" class="hidden">
+                <h2 style="margin-bottom: 20px; color: #495057;">All Activities (Teacher View)</h2>
+                
+                <div class="form-group" style="max-width: 300px; margin-bottom: 20px;">
+                    <label>Filter by Classroom</label>
+                    <select id="filterRoom" onchange="saveFilterRoom(); displayAllActivities();">
+                        <option value="">All Classrooms</option>
+                        <option value="Classroom 1">Classroom 1</option>
+                        <option value="Classroom 2">Classroom 2</option>
+                        <option value="Classroom 3">Classroom 3</option>
+                        <option value="Classroom 4">Classroom 4</option>
+                        <option value="Classroom 6">Classroom 6</option>
+                        <option value="Classroom 7">Classroom 7</option>
+                        <option value="Classroom 8">Classroom 8</option>
+                        <option value="Classroom 9">Classroom 9</option>
+                    </select>
+                </div>
+                
+                <div id="all-activities-list">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+            
+            <!-- Parent Tab -->
+            <div id="parent-tab" style="display: none;">
+                <div id="pin-entry">
+                    <div style="text-align: center; padding: 40px;">
+                        <h2 style="margin-bottom: 20px; color: #495057;">Enter Your Family PIN</h2>
+                        <p style="color: #6c757d; margin-bottom: 20px;">Enter the PIN provided by your teacher</p>
+                        <div style="max-width: 300px; margin: 0 auto;">
+                            <input type="text" id="parentPin" placeholder="Enter PIN" 
+                                   style="width: 100%; padding: 15px; font-size: 1.2em; text-align: center; border: 2px solid #dee2e6; border-radius: 8px; margin-bottom: 15px;">
+                            <button onclick="verifyPin()" class="submit-btn">View My Child's Activities</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="activities-view" class="hidden">
+                    <div style="margin-bottom: 20px;">
+                        <span class="live-badge">🔴 LIVE</span>
+                        <h2 style="display: inline-block; margin-left: 15px; color: #495057;" id="child-name-header"></h2>
+                    </div>
+                    
+                    <!-- Day Tabs for Parents -->
+                    <div id="day-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px;">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    
+                    <div id="activities-list">
+                        <div class="loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzM9nxNsFS8Dpzp9uQvMpCwBQdqrqHDtRq9octRtq-gAu_6IiSRoFhKbotdPpt-TeRfHQ/exec';
+        
+        let currentRoom = null;
+        let allChildren = [];
+        
+        // Cute custom alert
+        function cuteAlert(emoji, title, message, autoDismiss = true) {
+            // Remove any existing alerts
+            const existing = document.querySelectorAll('.custom-alert, .alert-overlay');
+            existing.forEach(el => el.remove());
+            
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'alert-overlay';
+            
+            // Create alert box
+            const alertBox = document.createElement('div');
+            alertBox.className = 'custom-alert';
+            alertBox.innerHTML = `
+                <div style="font-size: 3em; margin-bottom: 10px;">${emoji}</div>
+                <h3>${title}</h3>
+                <p>${message}</p>
+                ${!autoDismiss ? '<button onclick="this.closest(\'.custom-alert\').remove(); document.querySelector(\'.alert-overlay\').remove();">OK</button>' : ''}
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(alertBox);
+            
+            // Auto-dismiss after 2 seconds for success messages
+            if (autoDismiss) {
+                setTimeout(() => {
+                    overlay.remove();
+                    alertBox.remove();
+                }, 2000);
+            }
+        }
+        
+        // Room configurations
+        const ROOM_CONFIG = {
+            'Classroom 1': { bottle: true, meal: true, nap: true, diaper: true, potty: false, meals: false, moods: false },
+            'Classroom 2': { bottle: true, meal: true, nap: true, diaper: true, potty: false, meals: false, moods: false },
+            'Classroom 3': { bottle: true, meal: true, nap: true, diaper: true, potty: false, meals: false, moods: false },
+            'Classroom 4': { bottle: false, meal: true, nap: true, diaper: true, potty: false, meals: false, moods: false },
+            'Classroom 6': { bottle: true, meal: true, nap: true, diaper: true, potty: true, meals: false, moods: false },
+            'Classroom 7': { bottle: false, meal: false, nap: true, diaper: false, potty: true, meals: true, moods: true },
+            'Classroom 8': { bottle: false, meal: false, nap: true, diaper: false, potty: true, meals: true, moods: true },
+            'Classroom 9': { bottle: false, meal: false, nap: true, diaper: false, potty: false, meals: true, moods: true }
+        };
+        
+        // API helper
+        async function callAPI(action, data = {}) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, ...data })
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+        
+        // Storage helpers
+        function getCurrentChild() {
+            return localStorage.getItem('currentChildName');
+        }
+        
+        function setCurrentChild(childName) {
+            localStorage.setItem('currentChildName', childName);
+        }
+        
+        function clearCurrentChild() {
+            localStorage.removeItem('currentChildName');
+        }
+        
+        function getDefaultRoom() {
+            return localStorage.getItem('defaultRoom');
+        }
+        
+        function setDefaultRoom(room) {
+            localStorage.setItem('defaultRoom', room);
+        }
+        
+        // Save and load filter room
+        function saveFilterRoom() {
+            const room = document.getElementById('filterRoom')?.value;
+            if (room !== undefined) {
+                localStorage.setItem('filterRoom', room);
+            }
+        }
+        
+        function loadFilterRoom() {
+            const savedRoom = localStorage.getItem('filterRoom');
+            const filterSelect = document.getElementById('filterRoom');
+            if (savedRoom !== null && filterSelect) {
+                filterSelect.value = savedRoom;
+            }
+        }
+        
+        // Save and load default room
+        function saveDefaultRoom() {
+            const room = document.getElementById('teacherRoom').value;
+            if (room) {
+                setDefaultRoom(room);
+                loadChildrenForRoom();
+            }
+        }
+        
+        function loadDefaultRoom() {
+            const savedRoom = getDefaultRoom();
+            if (savedRoom) {
+                document.getElementById('teacherRoom').value = savedRoom;
+                loadChildrenForRoom();
+            }
+        }
+        
+        // Load children for selected room
+        async function loadChildrenForRoom() {
+            const room = document.getElementById('teacherRoom').value;
+            currentRoom = room;
+            
+            // Save the selected room to localStorage
+            if (room) {
+                setDefaultRoom(room);
+            }
+            
+            if (!room) {
+                document.getElementById('activity-forms').innerHTML = '<p style="color: #6c757d; text-align: center; padding: 40px;">Please select a classroom first</p>';
+                return;
+            }
+            
+            try {
+                const result = await callAPI('getChildren', { room });
+                renderActivityForm(room, result.children || []);
+            } catch (error) {
+                console.error('Error loading children:', error);
+            }
+        }
+        
+        // Render activity form based on room type
+        function renderActivityForm(room, children) {
+            const config = ROOM_CONFIG[room];
+            const container = document.getElementById('activity-forms');
+            
+            let html = '<form onsubmit="logActivity(event)">';
+            
+            // Child selector
+            html += '<div class="form-group">';
+            html += '<label>Child</label>';
+            html += '<select id="childName" required>';
+            html += '<option value="">Select child...</option>';
+            children.forEach(child => {
+                html += `<option value="${child.name}">${child.name}</option>`;
+            });
+            html += '</select></div>';
+            
+            // Activity type selector based on room
+            html += '<div class="form-group">';
+            html += '<label>Activity Type</label>';
+            html += '<select id="activityType" required onchange="updateActivityDetails()">';
+            html += '<option value="">Select activity...</option>';
+            
+            if (config.bottle) html += '<option value="bottle">🍼 Bottle</option>';
+            if (config.meal) html += '<option value="meal">🍎 Meal</option>';
+            if (config.nap) {
+                html += '<option value="nap-start">😴 Nap Started</option>';
+                html += '<option value="nap-end">😊 Nap Ended</option>';
+            }
+            if (config.diaper) html += '<option value="diaper">👶 Diaper</option>';
+            if (config.potty) html += '<option value="potty">🚽 Potty</option>';
+            if (config.meals) {
+                html += '<option value="breakfast">🍳 Breakfast</option>';
+                html += '<option value="lunch">🍱 Lunch</option>';
+                html += '<option value="snack">🍪 Snack</option>';
+            }
+            if (config.moods) {
+                html += '<option value="mood-am">😊 AM Mood</option>';
+                html += '<option value="mood-nap">😴 Nap Mood</option>';
+                html += '<option value="mood-pm">🌅 PM Mood</option>';
+            }
+            
+            html += '</select></div>';
+            
+            // Time selector
+            html += '<div class="form-group">';
+            html += '<label>Time</label>';
+            html += '<div style="display: flex; gap: 10px; align-items: center;">';
+            html += '<select id="activityHour" required style="flex: 1;"></select>';
+            html += '<span style="font-size: 1.5em; font-weight: bold;">:</span>';
+            html += '<select id="activityMinute" required style="flex: 1;"></select>';
+            html += '<select id="activityAmPm" required style="flex: 0.8;">';
+            html += '<option value="AM">AM</option>';
+            html += '<option value="PM">PM</option>';
+            html += '</select>';
+            html += '</div>';
+            html += '</div>';
+            
+            // Dynamic details section
+            html += '<div id="activity-details"></div>';
+            
+            // Optional notes
+            html += '<div class="form-group">';
+            html += '<label>Notes (optional)</label>';
+            html += '<textarea id="details" placeholder="Additional details..."></textarea>';
+            html += '</div>';
+            
+            html += '<button type="submit" class="submit-btn" id="log-btn">✓ Log Activity</button>';
+            html += '</form>';
+            
+            container.innerHTML = html;
+            populateTimeDropdown();
+        }
+        
+        // Update activity-specific details
+        function updateActivityDetails() {
+            const type = document.getElementById('activityType').value;
+            const container = document.getElementById('activity-details');
+            const room = currentRoom;
+            const config = ROOM_CONFIG[room];
+            
+            let html = '';
+            
+            // Potty details
+            if (type === 'potty') {
+                html += '<div class="form-group">';
+                html += '<label>Potty Status</label>';
+                html += '<div class="amount-selector">';
+                html += '<button type="button" class="amount-btn" onclick="selectOption(this, \'potty-status\', \'Tried\')">Tried</button>';
+                html += '<button type="button" class="amount-btn" onclick="selectOption(this, \'potty-status\', \'Went\')">Went</button>';
+                html += '<button type="button" class="amount-btn" onclick="selectOption(this, \'potty-status\', \'Accident\')">Accident</button>';
+                html += '<button type="button" class="amount-btn" onclick="selectOption(this, \'potty-status\', \'Refused\')">Refused</button>';
+                html += '</div>';
+                html += '<input type="hidden" id="potty-status">';
+                html += '</div>';
+            }
+            
+            // Meal amounts (for older rooms)
+            if (['breakfast', 'lunch', 'snack'].includes(type)) {
+                html += '<div class="form-group">';
+                html += '<label>Amount Eaten</label>';
+                html += '<div class="amount-selector">';
+                html += '<button type="button" class="amount-btn" onclick="selectOption(this, \'meal-amount\', \'Little\')">Little</button>';
+                html += '<button type="button" class="amount-btn" onclick="selectOption(this, \'meal-amount\', \'All\')">All</button>';
+                html += '<button type="button" class="amount-btn" onclick="selectOption(this, \'meal-amount\', \'Seconds\')">Seconds</button>';
+                html += '</div>';
+                html += '<input type="hidden" id="meal-amount">';
+                html += '</div>';
+            }
+            
+            // Mood selector
+            if (type.startsWith('mood-')) {
+                html += '<div class="form-group">';
+                html += '<label>How was it?</label>';
+                html += '<div class="mood-selector">';
+                html += '<button type="button" class="mood-btn green" onclick="selectMood(this, \'Green\')">🟢</button>';
+                html += '<button type="button" class="mood-btn yellow" onclick="selectMood(this, \'Yellow\')">🟡</button>';
+                html += '<button type="button" class="mood-btn red" onclick="selectMood(this, \'Red\')">🔴</button>';
+                html += '</div>';
+                html += '<input type="hidden" id="mood-value">';
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Selection helpers
+        function selectOption(btn, fieldId, value) {
+            const buttons = btn.parentElement.querySelectorAll('.amount-btn');
+            buttons.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById(fieldId).value = value;
+        }
+        
+        function selectMood(btn, value) {
+            const buttons = btn.parentElement.querySelectorAll('.mood-btn');
+            buttons.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById('mood-value').value = value;
+        }
+        
+        // Populate time dropdown
+        function populateTimeDropdown() {
+            const hourSelect = document.getElementById('activityHour');
+            const minuteSelect = document.getElementById('activityMinute');
+            const ampmSelect = document.getElementById('activityAmPm');
+            
+            if (!hourSelect || !minuteSelect || !ampmSelect) return;
+            
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            
+            // Populate hours (1-12)
+            hourSelect.innerHTML = '';
+            for (let i = 1; i <= 12; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.text = i;
+                hourSelect.appendChild(option);
+            }
+            
+            // Populate minutes (00-59)
+            minuteSelect.innerHTML = '';
+            for (let i = 0; i < 60; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.text = String(i).padStart(2, '0');
+                minuteSelect.appendChild(option);
+            }
+            
+            // Set to current time
+            const display12Hour = currentHour % 12 || 12;
+            hourSelect.value = display12Hour;
+            minuteSelect.value = currentMinute;
+            ampmSelect.value = currentHour >= 12 ? 'PM' : 'AM';
+        }
+        
+        // Log activity
+        async function logActivity(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('log-btn');
+            btn.disabled = true;
+            btn.textContent = 'Logging...';
+            
+            try {
+                const childName = document.getElementById('childName').value;
+                const activityType = document.getElementById('activityType').value;
+                let details = document.getElementById('details').value;
+                
+                // Get time from hour/minute/ampm selects
+                const hour12 = parseInt(document.getElementById('activityHour').value);
+                const minute = parseInt(document.getElementById('activityMinute').value);
+                const ampm = document.getElementById('activityAmPm').value;
+                
+                // Convert to 24-hour format
+                let hour24 = hour12;
+                if (ampm === 'PM' && hour12 !== 12) {
+                    hour24 = hour12 + 12;
+                } else if (ampm === 'AM' && hour12 === 12) {
+                    hour24 = 0;
+                }
+                
+                // Add specific details based on activity type
+                if (activityType === 'potty') {
+                    const status = document.getElementById('potty-status')?.value;
+                    if (status) details = status + (details ? ' - ' + details : '');
+                }
+                
+                if (['breakfast', 'lunch', 'snack'].includes(activityType)) {
+                    const amount = document.getElementById('meal-amount')?.value;
+                    if (amount) details = amount + (details ? ' - ' + details : '');
+                }
+                
+                if (activityType.startsWith('mood-')) {
+                    const mood = document.getElementById('mood-value')?.value;
+                    if (mood) details = mood + (details ? ' - ' + details : '');
+                }
+                
+                const activityTime = new Date();
+                activityTime.setHours(hour24, minute, 0, 0);
+                
+                const activity = {
+                    room: currentRoom,
+                    childName,
+                    type: activityType,
+                    details,
+                    timestamp: activityTime.toISOString()
+                };
+                
+                const result = await callAPI('addActivity', activity);
+                
+                if (result.success) {
+                    document.getElementById('details').value = '';
+                    document.getElementById('activityType').selectedIndex = 0;
+                    updateActivityDetails();
+                    populateTimeDropdown();
+                    cuteAlert('✨', 'Success!', 'Activity logged successfully!', true); // Auto-dismiss
+                } else {
+                    cuteAlert('😟', 'Oops!', 'Error logging activity', false); // Requires OK
+                }
+            } catch (error) {
+                cuteAlert('😟', 'Oops!', 'Error logging activity: ' + error.message, false); // Requires OK
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✓ Log Activity';
+            }
+        }
+        
+        // Display children in manage tab
+        async function displayChildren() {
+            try {
+                const result = await callAPI('getAllChildren');
+                const container = document.getElementById('child-list');
+                
+                if (!result.children || result.children.length === 0) {
+                    container.innerHTML = '<p style="color: #6c757d;">No children added yet. Add your first child below!</p>';
+                    return;
+                }
+                
+                container.innerHTML = result.children.map((child, index) => `
+                    <div class="child-tag">
+                        ${child.room} - ${child.name}
+                        <button class="remove-child" onclick="editChild(${index}, '${child.name}', '${child.room}')" title="Edit" style="background: #667eea; margin-left: 5px;">✏️</button>
+                        <button class="remove-child" onclick="removeChild(${index})" title="Remove">×</button>
+                        <button class="remove-child" onclick="copyParentLink('${encodeURIComponent(child.name)}')" title="Copy Parent Link" style="background: #28a745; margin-left: 5px;">🔗</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('child-list').innerHTML = '<p style="color: #dc3545;">Error loading children</p>';
+            }
+        }
+        
+        // Copy parent link to clipboard
+        function copyParentLink(childName) {
+            const baseUrl = window.location.href.split('?')[0]; // Remove any existing params
+            const parentLink = `${baseUrl}?child=${childName}`;
+            
+            navigator.clipboard.writeText(parentLink).then(() => {
+                cuteAlert('🔗', 'Link Copied!', 'Parent link copied to clipboard! Send it via ClassDojo.', true); // Auto-dismiss
+            }).catch(() => {
+                // Fallback if clipboard doesn't work
+                cuteAlert('🔗', 'Parent Link', `Copy this link:<br><input type="text" value="${parentLink}" readonly style="width: 100%; padding: 10px; margin-top: 10px;" onclick="this.select();">`, false); // Requires OK
+            });
+        }
+        
+        // Add child
+        async function addChild() {
+            const room = document.getElementById('newChildRoom').value;
+            const name = document.getElementById('newChildName').value.trim();
+            
+            if (!room || !name) {
+                cuteAlert('📝', 'Missing Info', 'Please select a classroom and enter a name', false); // Requires OK
+                return;
+            }
+            
+            try {
+                const result = await callAPI('addChild', { room, name });
+                
+                if (result.success) {
+                    document.getElementById('newChildRoom').selectedIndex = 0;
+                    document.getElementById('newChildName').value = '';
+                    displayChildren();
+                    cuteAlert('🎉', 'Child Added!', `${name} has been added successfully!`, true); // Auto-dismiss
+                } else {
+                    cuteAlert('😟', 'Oops!', result.message || 'Error adding child', false); // Requires OK
+                }
+            } catch (error) {
+                cuteAlert('😟', 'Oops!', 'Error adding child: ' + error.message, false); // Requires OK
+            }
+        }
+        
+        // Edit child (change classroom)
+        function editChild(index, childName, currentRoom) {
+            const overlay = document.createElement('div');
+            overlay.className = 'alert-overlay';
+            
+            const editBox = document.createElement('div');
+            editBox.className = 'custom-alert';
+            editBox.style.maxWidth = '400px';
+            
+            editBox.innerHTML = `
+                <div style="font-size: 2.5em; margin-bottom: 10px;">✏️</div>
+                <h3>Move ${childName}</h3>
+                <div style="text-align: left; margin: 20px 0;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Current Classroom:</label>
+                        <div style="padding: 10px; background: #f8f9fa; border-radius: 5px;">${currentRoom}</div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Move to:</label>
+                        <select id="edit-child-room" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 5px;">
+                            <option value="Classroom 1" ${currentRoom === 'Classroom 1' ? 'selected' : ''}>Classroom 1</option>
+                            <option value="Classroom 2" ${currentRoom === 'Classroom 2' ? 'selected' : ''}>Classroom 2</option>
+                            <option value="Classroom 3" ${currentRoom === 'Classroom 3' ? 'selected' : ''}>Classroom 3</option>
+                            <option value="Classroom 4" ${currentRoom === 'Classroom 4' ? 'selected' : ''}>Classroom 4</option>
+                            <option value="Classroom 6" ${currentRoom === 'Classroom 6' ? 'selected' : ''}>Classroom 6</option>
+                            <option value="Classroom 7" ${currentRoom === 'Classroom 7' ? 'selected' : ''}>Classroom 7</option>
+                            <option value="Classroom 8" ${currentRoom === 'Classroom 8' ? 'selected' : ''}>Classroom 8</option>
+                            <option value="Classroom 9" ${currentRoom === 'Classroom 9' ? 'selected' : ''}>Classroom 9</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="this.closest('.custom-alert').remove(); document.querySelector('.alert-overlay').remove();" 
+                            style="background: #6c757d;">Cancel</button>
+                    <button onclick="saveEditedChild(${index}, '${childName}')" 
+                            style="background: #28a745;">Save Changes</button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(editBox);
+        }
+        
+        // Save edited child (update classroom)
+        async function saveEditedChild(index, childName) {
+            const newRoom = document.getElementById('edit-child-room').value;
+            
+            // Close dialog
+            document.querySelectorAll('.custom-alert, .alert-overlay').forEach(el => el.remove());
+            
+            try {
+                // Delete old entry
+                await callAPI('deleteChild', { index });
+                
+                // Add with new room
+                const result = await callAPI('addChild', { room: newRoom, name: childName });
+                
+                if (result.success) {
+                    displayChildren();
+                    cuteAlert('✅', 'Moved!', `${childName} has been moved to ${newRoom}`);
+                } else {
+                    cuteAlert('😟', 'Oops!', 'Error moving child');
+                }
+            } catch (error) {
+                cuteAlert('😟', 'Oops!', 'Error moving child: ' + error.message);
+            }
+        }
+        
+        // Remove child
+        async function removeChild(index) {
+            try {
+                const result = await callAPI('getAllChildren');
+                const child = result.children[index];
+                
+                // Create custom confirm dialog
+                const overlay = document.createElement('div');
+                overlay.className = 'alert-overlay';
+                
+                const confirmBox = document.createElement('div');
+                confirmBox.className = 'custom-alert';
+                confirmBox.innerHTML = `
+                    <div style="font-size: 3em; margin-bottom: 10px;">👋</div>
+                    <h3>Remove ${child.name}?</h3>
+                    <p>Are you sure you want to remove ${child.name} from ${child.room}?</p>
+                    <div style="display: flex; gap: 10px; justify-content: center;">
+                        <button onclick="this.closest('.custom-alert').remove(); document.querySelector('.alert-overlay').remove();" 
+                                style="background: #6c757d;">Cancel</button>
+                        <button onclick="confirmRemoveChild(${index})" 
+                                style="background: #dc3545;">Remove</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(confirmBox);
+            } catch (error) {
+                cuteAlert('😟', 'Oops!', 'Error: ' + error.message);
+            }
+        }
+        
+        async function confirmRemoveChild(index) {
+            // Remove confirm dialog
+            document.querySelectorAll('.custom-alert, .alert-overlay').forEach(el => el.remove());
+            
+            try {
+                const deleteResult = await callAPI('deleteChild', { index });
+                
+                if (deleteResult.success) {
+                    displayChildren();
+                    cuteAlert('✅', 'Removed!', 'Child has been removed', true); // Auto-dismiss
+                } else {
+                    cuteAlert('😟', 'Oops!', 'Error removing child', false); // Requires OK
+                }
+            } catch (error) {
+                cuteAlert('😟', 'Oops!', 'Error removing child: ' + error.message, false); // Requires OK
+            }
+        }
+        
+        // Verify PIN
+        async function verifyPin() {
+            const pinInput = document.getElementById('parentPin');
+            const enteredPin = pinInput.value.trim();
+            
+            if (!enteredPin) {
+                cuteAlert('🔑', 'PIN Required', 'Please enter your PIN');
+                return;
+            }
+            
+            try {
+                const result = await callAPI('getAllChildren');
+                
+                if (!result.children) {
+                    cuteAlert('❌', 'Invalid PIN', 'Please try again or contact your teacher');
+                    pinInput.value = '';
+                    return;
+                }
+                
+                const child = result.children.find(c => c.pin === enteredPin);
+                
+                if (!child) {
+                    cuteAlert('❌', 'Invalid PIN', 'Please try again or contact your teacher');
+                    pinInput.value = '';
+                    return;
+                }
+                
+                setCurrentChild(child.name);
+                document.getElementById('pin-entry').classList.add('hidden');
+                document.getElementById('activities-view').classList.remove('hidden');
+                document.getElementById('child-name-header').textContent = child.name + "'s Activities";
+                
+                displayActivities();
+            } catch (error) {
+                cuteAlert('😟', 'Oops!', 'Error verifying PIN: ' + error.message);
+            }
+        }
+        
+        // Logout
+        function logout() {
+            clearCurrentChild();
+            document.getElementById('pin-entry').classList.remove('hidden');
+            document.getElementById('activities-view').classList.add('hidden');
+            document.getElementById('parentPin').value = '';
+        }
+        
+        // Check parent login
+        async function checkParentLogin() {
+            // Check if child name is in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const childName = urlParams.get('child');
+            
+            if (childName) {
+                // Auto-login with child name from URL - hide tabs and show only activities
+                try {
+                    const result = await callAPI('getAllChildren');
+                    
+                    if (result.children) {
+                        const child = result.children.find(c => c.name === decodeURIComponent(childName));
+                        
+                        if (child) {
+                            // Hide tabs for parent view
+                            document.querySelector('.tabs').style.display = 'none';
+                            
+                            // Show parent tab
+                            const parentTab = document.getElementById('parent-tab');
+                            parentTab.style.display = 'block';
+                            parentTab.classList.remove('hidden');
+                            
+                            document.getElementById('pin-entry').classList.add('hidden');
+                            document.getElementById('activities-view').classList.remove('hidden');
+                            document.getElementById('child-name-header').textContent = child.name + "'s Activities";
+                            displayActivities(child.name);
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading child:', error);
+                }
+            }
+            
+            // If no child in URL, show tabs (teacher mode)
+            document.querySelector('.tabs').style.display = 'flex';
+        }
+        
+        // Format time
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            const displayMinutes = String(minutes).padStart(2, '0');
+            
+            return `${displayHours}:${displayMinutes} ${ampm}`;
+        }
+        
+        // Get date string
+        function getDateString(timestamp) {
+            const date = new Date(timestamp);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (date.toDateString() === today.toDateString()) {
+                return 'Today';
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                return 'Yesterday';
+            } else {
+                return date.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            }
+        }
+        
+        // Group activities by date
+        function groupActivitiesByDate(activities) {
+            const grouped = {};
+            
+            activities.forEach(activity => {
+                const dateStr = getDateString(activity.timestamp);
+                if (!grouped[dateStr]) {
+                    grouped[dateStr] = [];
+                }
+                grouped[dateStr].push(activity);
+            });
+            
+            return grouped;
+        }
+        
+        // Get activity label
+        function getActivityLabel(type) {
+            const labels = {
+                bottle: '🍼 Bottle',
+                meal: '🍎 Meal',
+                'nap-start': '😴 Nap Started',
+                'nap-end': '😊 Nap Ended',
+                diaper: '👶 Diaper',
+                potty: '🚽 Potty',
+                breakfast: '🍳 Breakfast',
+                lunch: '🍱 Lunch',
+                snack: '🍪 Snack',
+                'mood-am': '😊 AM Mood',
+                'mood-nap': '😴 Nap Mood',
+                'mood-pm': '🌅 PM Mood'
+            };
+            return labels[type] || type;
+        }
+        
+        // Display activities (for parent view)
+        async function displayActivities(childName) {
+            try {
+                const result = await callAPI('getActivities', { childName });
+                
+                let activities = result.activities || [];
+                activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                const container = document.getElementById('activities-list');
+                const dayTabsContainer = document.getElementById('day-tabs');
+                
+                if (activities.length === 0) {
+                    if (dayTabsContainer) dayTabsContainer.innerHTML = '';
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No activities yet</h3>
+                            <p>Activities will appear here as teachers log them</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Group activities by date
+                const groupedActivities = groupActivitiesByDate(activities);
+                const dates = Object.keys(groupedActivities);
+                
+                // Create day tabs (if dayTabsContainer exists - parent view only)
+                if (dayTabsContainer) {
+                    let selectedDay = localStorage.getItem('selectedDay') || dates[0];
+                    
+                    // Check if selected day still has activities
+                    if (!dates.includes(selectedDay)) {
+                        selectedDay = dates[0];
+                    }
+                    
+                    dayTabsContainer.innerHTML = dates.map(dateStr => 
+                        `<button class="day-tab-btn ${dateStr === selectedDay ? 'active' : ''}" 
+                                onclick="selectDay('${dateStr}')">${dateStr}</button>`
+                    ).join('');
+                    
+                    // Show only selected day's activities
+                    const dayActivities = groupedActivities[selectedDay];
+                    
+                    let html = '';
+                    dayActivities.forEach(activity => {
+                        // For mood activities, use the actual mood color from details
+                        let icon;
+                        if (activity.type.startsWith('mood-')) {
+                            icon = getMoodIconFromDetails(activity.details);
+                        } else {
+                            icon = getActivityIcon(activity.type);
+                        }
+                        
+                        const label = getActivityLabel(activity.type).replace(/[🍼🍎😴😊👶🚽🍳🍱🍪🌅]/g, '').trim();
+                        
+                        html += `
+                            <div class="parent-activity-card">
+                                <div class="parent-activity-icon">${icon}</div>
+                                <div class="parent-activity-content">
+                                    <div class="parent-activity-title">${label}</div>
+                                    ${activity.details ? `<div class="parent-activity-details">${activity.details}</div>` : ''}
+                                </div>
+                                <div class="parent-activity-time">${formatTime(activity.timestamp)}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    container.innerHTML = html;
+                } else {
+                    // Teacher view - show all with date headers
+                    let html = '';
+                    Object.keys(groupedActivities).forEach(dateStr => {
+                        html += `<div class="date-header">${dateStr}</div>`;
+                        
+                        groupedActivities[dateStr].forEach(activity => {
+                            html += `
+                                <div class="activity-card">
+                                    <div class="activity-header">
+                                        <span class="activity-type type-${activity.type}">
+                                            ${getActivityLabel(activity.type)}
+                                        </span>
+                                        <span class="activity-time">${formatTime(activity.timestamp)}</span>
+                                    </div>
+                                    ${activity.details ? `<div class="activity-description">${activity.details}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                    });
+                    
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                document.getElementById('activities-list').innerHTML = '<p style="color: #dc3545;">Error loading activities</p>';
+            }
+        }
+        
+        // Select day for parent view
+        function selectDay(dateStr) {
+            localStorage.setItem('selectedDay', dateStr);
+            const urlParams = new URLSearchParams(window.location.search);
+            const childName = urlParams.get('child');
+            if (childName) {
+                displayActivities(decodeURIComponent(childName));
+            }
+        }
+        
+        // Get activity icon
+        function getActivityIcon(type) {
+            const icons = {
+                bottle: '🍼',
+                meal: '🍎',
+                'nap-start': '😴',
+                'nap-end': '😊',
+                diaper: '👶',
+                potty: '🚽',
+                breakfast: '🍳',
+                lunch: '🍱',
+                snack: '🍪',
+                'mood-am': '⭐',
+                'mood-nap': '⭐',
+                'mood-pm': '⭐'
+            };
+            return icons[type] || '📝';
+        }
+        
+        // Get mood icon from details (for parent view)
+        function getMoodIconFromDetails(details) {
+            if (!details) return '⭐';
+            if (details.toLowerCase().includes('green')) return '🟢';
+            if (details.toLowerCase().includes('yellow')) return '🟡';
+            if (details.toLowerCase().includes('red')) return '🔴';
+            return '⭐';
+        }
+        
+        // Display all activities
+        async function displayAllActivities() {
+            try {
+                const result = await callAPI('getActivities', {});
+                const container = document.getElementById('all-activities-list');
+                const filterRoom = document.getElementById('filterRoom')?.value;
+                
+                if (!result.activities || result.activities.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No activities yet</h3>
+                            <p>Activities will appear here as teachers log them</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let activities = result.activities;
+                
+                // Filter by room if selected
+                if (filterRoom) {
+                    activities = activities.filter(a => a.room === filterRoom);
+                }
+                
+                activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                if (activities.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No activities for ${filterRoom}</h3>
+                            <p>No activities have been logged for this classroom yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const groupedActivities = groupActivitiesByDate(activities);
+                
+                let html = '';
+                Object.keys(groupedActivities).forEach(dateStr => {
+                    html += `<div class="date-header">${dateStr}</div>`;
+                    
+                    groupedActivities[dateStr].forEach(activity => {
+                        html += `
+                            <div class="activity-card">
+                                <div class="activity-header">
+                                    <span class="activity-type type-${activity.type}">
+                                        ${getActivityLabel(activity.type)}
+                                    </span>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <span class="activity-time">${formatTime(activity.timestamp)}</span>
+                                        <button class="delete-btn" style="background: #667eea;" onclick="editActivity(${activity.id}, '${activity.childName}', '${activity.type}', '${activity.details ? activity.details.replace(/'/g, "\\'") : ''}', '${activity.timestamp}')">Edit</button>
+                                        <button class="delete-btn" onclick="deleteActivity(${activity.id})">Delete</button>
+                                    </div>
+                                </div>
+                                <div class="activity-child">${activity.room} - ${activity.childName}</div>
+                                ${activity.details ? `<div class="activity-description">${activity.details}</div>` : ''}
+                            </div>
+                        `;
+                    });
+                });
+                
+                container.innerHTML = html;
+            } catch (error) {
+                document.getElementById('all-activities-list').innerHTML = '<p style="color: #dc3545;">Error loading activities</p>';
+            }
+        }
+        
+        // Edit activity
+        function editActivity(activityId, childName, type, details, timestamp) {
+            const overlay = document.createElement('div');
+            overlay.className = 'alert-overlay';
+            
+            const editBox = document.createElement('div');
+            editBox.className = 'custom-alert';
+            editBox.style.maxWidth = '500px';
+            
+            // Parse the timestamp to get time
+            const date = new Date(timestamp);
+            const hours24 = date.getHours();
+            const minutes = date.getMinutes();
+            const hours12 = hours24 % 12 || 12;
+            const ampm = hours24 >= 12 ? 'PM' : 'AM';
+            
+            editBox.innerHTML = `
+                <div style="font-size: 2.5em; margin-bottom: 10px;">✏️</div>
+                <h3>Edit Activity</h3>
+                <div style="text-align: left; margin: 20px 0;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Child:</label>
+                        <div style="padding: 10px; background: #f8f9fa; border-radius: 5px;">${childName}</div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Activity:</label>
+                        <div style="padding: 10px; background: #f8f9fa; border-radius: 5px;">${getActivityLabel(type)}</div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Time:</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select id="edit-hour" style="flex: 1; padding: 10px; border: 2px solid #dee2e6; border-radius: 5px;">
+                                ${generateHourOptions(hours12)}
+                            </select>
+                            <span style="font-size: 1.5em; font-weight: bold;">:</span>
+                            <select id="edit-minute" style="flex: 1; padding: 10px; border: 2px solid #dee2e6; border-radius: 5px;">
+                                ${generateMinuteOptions(minutes)}
+                            </select>
+                            <select id="edit-ampm" style="flex: 0.8; padding: 10px; border: 2px solid #dee2e6; border-radius: 5px;">
+                                <option value="AM" ${ampm === 'AM' ? 'selected' : ''}>AM</option>
+                                <option value="PM" ${ampm === 'PM' ? 'selected' : ''}>PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Details:</label>
+                        <textarea id="edit-details" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 5px; min-height: 80px;">${details}</textarea>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="this.closest('.custom-alert').remove(); document.querySelector('.alert-overlay').remove();" 
+                            style="background: #6c757d;">Cancel</button>
+                    <button onclick="saveEditedActivity(${activityId})" 
+                            style="background: #28a745;">Save Changes</button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(editBox);
+        }
+        
+        // Generate hour options (1-12)
+        function generateHourOptions(selectedHour) {
+            let html = '';
+            for (let i = 1; i <= 12; i++) {
+                const selected = i === selectedHour ? 'selected' : '';
+                html += `<option value="${i}" ${selected}>${i}</option>`;
+            }
+            return html;
+        }
+        
+        // Generate minute options (00-59)
+        function generateMinuteOptions(selectedMinute) {
+            let html = '';
+            for (let i = 0; i < 60; i++) {
+                const selected = i === selectedMinute ? 'selected' : '';
+                html += `<option value="${i}" ${selected}>${String(i).padStart(2, '0')}</option>`;
+            }
+            return html;
+        }
+        
+        // Generate time options for edit dialog (DEPRECATED)
+        function generateTimeOptions(currentTime) {
+            let html = '';
+            for (let hour = 6; hour <= 20; hour++) {
+                for (let minute = 0; minute < 60; minute += 15) {
+                    const timeVal = `${hour}:${minute}`;
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    const displayHours = hour % 12 || 12;
+                    const displayMinutes = String(minute).padStart(2, '0');
+                    const selected = timeVal === currentTime ? 'selected' : '';
+                    html += `<option value="${timeVal}" ${selected}>${displayHours}:${displayMinutes} ${ampm}</option>`;
+                }
+            }
+            return html;
+        }
+        
+        // Save edited activity
+        async function saveEditedActivity(activityId) {
+            const hour12 = parseInt(document.getElementById('edit-hour').value);
+            const minute = parseInt(document.getElementById('edit-minute').value);
+            const ampm = document.getElementById('edit-ampm').value;
+            const newDetails = document.getElementById('edit-details').value;
+            
+            // Convert to 24-hour format
+            let hour24 = hour12;
+            if (ampm === 'PM' && hour12 !== 12) {
+                hour24 = hour12 + 12;
+            } else if (ampm === 'AM' && hour12 === 12) {
+                hour24 = 0;
+            }
+            
+            // Close dialog
+            document.querySelectorAll('.custom-alert, .alert-overlay').forEach(el => el.remove());
+            
+            try {
+                // Get the original activity to preserve child name, room, and type
+                const result = await callAPI('getActivities', {});
+                const activity = result.activities.find(a => a.id == activityId);
+                
+                if (!activity) {
+                    cuteAlert('😟', 'Oops!', 'Activity not found');
+                    return;
+                }
+                
+                // Delete the old activity
+                await callAPI('deleteActivity', { id: activityId });
+                
+                // Create updated activity with new time and details
+                const newTimestamp = new Date(activity.timestamp);
+                newTimestamp.setHours(hour24, minute, 0, 0);
+                
+                const updatedActivity = {
+                    room: activity.room,
+                    childName: activity.childName,
+                    type: activity.type,
+                    details: newDetails,
+                    timestamp: newTimestamp.toISOString()
+                };
+                
+                const addResult = await callAPI('addActivity', updatedActivity);
+                
+                if (addResult.success) {
+                    displayAllActivities();
+                    cuteAlert('✅', 'Updated!', 'Activity has been updated successfully');
+                } else {
+                    cuteAlert('😟', 'Oops!', 'Error updating activity');
+                }
+            } catch (error) {
+                cuteAlert('😟', 'Oops!', 'Error updating activity: ' + error.message);
+            }
+        }
+        
+        // Delete activity
+        async function deleteActivity(activityId) {
+            // Create custom confirm dialog
+            const overlay = document.createElement('div');
+            overlay.className = 'alert-overlay';
+            
+            const confirmBox = document.createElement('div');
+            confirmBox.className = 'custom-alert';
+            confirmBox.innerHTML = `
+                <div style="font-size: 3em; margin-bottom: 10px;">🗑️</div>
+                <h3>Delete Activity?</h3>
+                <p>Are you sure you want to delete this activity?</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="this.closest('.custom-alert').remove(); document.querySelector('.alert-overlay').remove();" 
+                            style="background: #6c757d;">Cancel</button>
+                    <button onclick="confirmDelete(${activityId})" 
+                            style="background: #dc3545;">Delete</button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(confirmBox);
+        }
+        
+        async function confirmDelete(activityId) {
+            // Remove confirm dialog
+            document.querySelectorAll('.custom-alert, .alert-overlay').forEach(el => el.remove());
+            
+            try {
+                const result = await callAPI('deleteActivity', { id: activityId });
+                
+                if (result.success) {
+                    displayActivities();
+                    displayAllActivities();
+                    cuteAlert('✅', 'Deleted!', 'Activity has been deleted', true); // Auto-dismiss
+                } else {
+                    cuteAlert('😟', 'Oops!', 'Error deleting activity', false); // Requires OK
+                }
+            } catch (error) {
+                cuteAlert('😟', 'Oops!', 'Error deleting activity: ' + error.message, false); // Requires OK
+            }
+        }
+        
+        // Show/hide tabs
+        function showTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            const teacherTab = document.getElementById('teacher-tab');
+            const parentTab = document.getElementById('parent-tab');
+            const manageTab = document.getElementById('manage-tab');
+            const allTab = document.getElementById('all-tab');
+            const tabsContainer = document.querySelector('.tabs');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            teacherTab.classList.add('hidden');
+            teacherTab.style.display = 'none';
+            parentTab.classList.add('hidden');
+            parentTab.style.display = 'none';
+            manageTab.classList.add('hidden');
+            manageTab.style.display = 'none';
+            allTab.classList.add('hidden');
+            allTab.style.display = 'none';
+            
+            // Show tabs for teacher view
+            tabsContainer.style.display = 'flex';
+            
+            if (tab === 'teacher') {
+                tabs[0].classList.add('active');
+                teacherTab.classList.remove('hidden');
+                teacherTab.style.display = 'block';
+                loadDefaultRoom(); // Auto-load saved room
+            } else if (tab === 'all') {
+                tabs[1].classList.add('active');
+                allTab.classList.remove('hidden');
+                allTab.style.display = 'block';
+                loadFilterRoom(); // Auto-load saved filter
+                displayAllActivities();
+            } else if (tab === 'manage') {
+                tabs[2].classList.add('active');
+                manageTab.classList.remove('hidden');
+                manageTab.style.display = 'block';
+                displayChildren();
+            }
+        }
+        
+        // Enter key handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            const parentPinInput = document.getElementById('parentPin');
+            if (parentPinInput) {
+                parentPinInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        verifyPin();
+                    }
+                });
+            }
+        });
+        
+        // Initial load
+        const urlParams = new URLSearchParams(window.location.search);
+        const childName = urlParams.get('child');
+        
+        if (childName) {
+            // Parent mode - show their child's activities
+            checkParentLogin();
+        } else {
+            // Teacher mode - show Quick Log tab
+            showTab('teacher');
+        }
+        
+        // Auto-refresh for parent view
+        setInterval(() => {
+            if (childName) {
+                displayActivities(decodeURIComponent(childName));
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
